@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import urllib
 
 # TODO:
 # * saving index to database (sqlite?)
@@ -6,7 +7,6 @@
 
 def get_page(url):
     try:
-        import urllib
         return urllib.urlopen(url).read()
     except:
         return ""
@@ -15,10 +15,9 @@ def get_next_target(page):
     start_link = page.find('<a href=')
     if start_link == -1: 
         return None, 0
-    start_quote = page.find('"', start_link)
-    end_quote = page.find('"', start_quote + 1)
-    url = page[start_quote + 1:end_quote]
-    return url, end_quote
+    start_url = page.find('"', start_link)
+    end_url = page.find('"', start_url + 1)
+    return page[start_url + 1:end_url], end_url
 
 def union(p,q):
     for e in q:
@@ -44,9 +43,9 @@ def add_page_to_index(index, url, content):
 def add_to_index(index, keyword, url):
     if index.has_key(keyword):
         if url not in index[keyword]:
-            index[keyword].append([url, 0])
+            index[keyword].append(url)
     else:
-        index[keyword] = [[url, 0]]
+        index[keyword] = [url]
 
 def record_user_click(index, keyword, url):
     for entry in index[keyword]:
@@ -68,5 +67,6 @@ def crawl_web(seed, max_pages=1000):
             content = get_page(page)
             add_page_to_index(index, page, content)
             union(tocrawl, get_all_links(content))
+            print tocrawl
             crawled.append(page)
     return index
