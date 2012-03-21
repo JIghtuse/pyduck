@@ -36,19 +36,6 @@ def get_all_links(page):
             break
     return links
 
-def crawl_web(seed):
-    tocrawl = [seed]
-    crawled = []
-    index = {}
-    while tocrawl:
-        page = tocrawl.pop()
-        if page not in crawled:
-            content = get_page(page)
-            add_page_to_index(index, page, content)
-            union(tocrawl, get_all_links(content))
-            crawled.append(page)
-    return index
-
 def add_page_to_index(index, url, content):
     words = content.split()
     for word in words:
@@ -70,3 +57,16 @@ def lookup(index, keyword):
     if index.has_key(keyword):
         return index[keyword]
     return None
+
+def crawl_web(seed, max_pages=1000):
+    tocrawl = [seed]
+    crawled = []
+    index = {}
+    while tocrawl and len(crawled) < max_pages:
+        page = tocrawl.pop()
+        if page not in crawled:
+            content = get_page(page)
+            add_page_to_index(index, page, content)
+            union(tocrawl, get_all_links(content))
+            crawled.append(page)
+    return index
